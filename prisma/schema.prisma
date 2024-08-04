@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserRegistration {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  hash  String
+  role      Role
+  hashrt    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Patient Patient?
+
+  Doctor Doctor?
+}
+
+enum Role {
+  PATIENT
+  DOCTOR
+}
+
+model Patient {
+  id             Int              @id @default(autoincrement())
+  registrationId Int              @unique
+  registration   UserRegistration @relation(fields: [registrationId], references: [id])
+  name           String?
+  phoneNumber    String?          @unique @db.VarChar(15)
+  dateOfBirth    String?
+  pincode        String?          @db.VarChar(6)
+  aadharNumber   String?          @unique @db.VarChar(12)
+  nomineeDetails Json?
+  history        PatientHistory?
+}
+
+model Doctor {
+  id             Int              @id @default(autoincrement())
+  registrationId Int              @unique
+  registration   UserRegistration @relation(fields: [registrationId], references: [id])
+  name           String?
+  specialization String?
+  phoneNumber    String?          @unique @db.VarChar(15)
+  clinicAddress  String?
+}
+
+model PatientHistory {
+  id                     Int      @id @default(autoincrement())
+  patient                Patient  @relation(fields: [patientId], references: [id])
+  patientId              Int      @unique
+  height                 String
+  bloodGroup             String
+  medications            String
+  allergies              String
+  historyOfSurgeries     String
+  timeInterval           Int // Calculated field (time interval)
+  gptal                  Json // Embedded type for GPTAL
+  historyOfIllnesses     String[]
+  familyHistoryOfIllness String[]
+}
+
+
